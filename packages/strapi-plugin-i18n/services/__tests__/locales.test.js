@@ -131,4 +131,44 @@ describe('Locales', () => {
       expect(deletedLocale).toMatchObject(locale);
     });
   });
+
+  describe('initDefaultLocale', () => {
+    test('create default local if none exists', async () => {
+      const count = jest.fn(() => Promise.resolve(0));
+      const create = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query: () => ({
+          count,
+          create,
+        }),
+      };
+
+      await localesService.initDefaultLocale();
+      expect(count).toHaveBeenCalledWith();
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'English',
+          code: 'en',
+          isDefault: true,
+        })
+      );
+    });
+
+    test('does not create default local if one already exists', async () => {
+      const count = jest.fn(() => Promise.resolve(1));
+      const create = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query: () => ({
+          count,
+          create,
+        }),
+      };
+
+      await localesService.initDefaultLocale();
+      expect(count).toHaveBeenCalledWith();
+      expect(create).not.toHaveBeenCalled();
+    });
+  });
 });
